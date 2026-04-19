@@ -11,10 +11,13 @@ export default function Result() {
     const router = useRouter();
     const [idea, setIdea] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [isSaved, setIsSaved] = useState(false);
     const scaleAnim = React.useRef(new Animated.Value(1)).current;
 
     useEffect(() => {
+        setLoading(true);
+        setError(null);
         const fetchUrl = `${API_BASE_URL}/${category}?title=${encodeURIComponent(title as string)}`;
         axios.get(fetchUrl)
             .then(async res => {
@@ -30,7 +33,8 @@ export default function Result() {
                 setLoading(false);
             })
             .catch(err => {
-                console.error(err);
+                console.error("Fetch Error:", err);
+                setError("Unable to load idea details. Please check if the backend is running.");
                 setLoading(false);
             });
     }, [category, title]);
@@ -73,8 +77,36 @@ export default function Result() {
     if (loading) {
         return (
             <SafeAreaView style={styles.safeArea}>
+                <View style={styles.header}>
+                    <Pressable onPress={() => router.back()} style={styles.backButton}>
+                        <Text style={styles.backText}>BACK</Text>
+                    </Pressable>
+                </View>
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#1C1C1E" />
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+    if (error) {
+        return (
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.header}>
+                    <Pressable onPress={() => router.back()} style={styles.backButton}>
+                        <Text style={styles.backText}>BACK</Text>
+                    </Pressable>
+                </View>
+                <View style={styles.loadingContainer}>
+                    <Text style={{ fontSize: 40 }}>⚠️</Text>
+                    <Text style={{ color: '#FF3B30', marginTop: 10, fontWeight: '600' }}>Error</Text>
+                    <Text style={{ color: '#8E8E93', textAlign: 'center', marginHorizontal: 40, marginTop: 10 }}>{error}</Text>
+                    <Pressable 
+                        onPress={() => router.back()} 
+                        style={{ marginTop: 20, backgroundColor: '#1C1C1E', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 }}
+                    >
+                        <Text style={{ color: '#FFF', fontWeight: '700' }}>GO BACK</Text>
+                    </Pressable>
                 </View>
             </SafeAreaView>
         );

@@ -14,15 +14,19 @@ export default function SwipeScreen() {
     const router = useRouter();
     const [ideas, setIdeas] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        setLoading(true);
+        setError(null);
         axios.get(`${API_BASE_URL}/${category}/all`)
             .then(res => {
                 setIdeas(res.data);
                 setLoading(false);
             })
             .catch(err => {
-                console.error(err);
+                console.error("Fetch Error:", err);
+                setError("Unable to connect to the server. Please check your network and ensure the backend is running.");
                 setLoading(false);
             });
     }, [category]);
@@ -37,6 +41,30 @@ export default function SwipeScreen() {
                 </View>
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#1C1C1E" />
+                    <Text style={{ marginTop: 10, color: '#8E8E93' }}>Connecting...</Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+    if (error) {
+        return (
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.header}>
+                    <Pressable onPress={() => router.back()} style={styles.backButton}>
+                        <Text style={styles.backText}>BACK</Text>
+                    </Pressable>
+                </View>
+                <View style={styles.loadingContainer}>
+                    <Text style={{ fontSize: 40 }}>⚠️</Text>
+                    <Text style={{ color: '#FF3B30', marginTop: 10, fontWeight: '600' }}>Network Error</Text>
+                    <Text style={{ color: '#8E8E93', textAlign: 'center', marginHorizontal: 40, marginTop: 10 }}>{error}</Text>
+                    <Pressable 
+                        onPress={() => router.back()} 
+                        style={{ marginTop: 20, backgroundColor: '#1C1C1E', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 }}
+                    >
+                        <Text style={{ color: '#FFF', fontWeight: '700' }}>GO BACK</Text>
+                    </Pressable>
                 </View>
             </SafeAreaView>
         );
